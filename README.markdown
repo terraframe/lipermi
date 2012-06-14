@@ -14,20 +14,23 @@ Which, in turn, was forked from the original project, which can be found here:
 
 Asynchronous RMI
 -------
-The only real change to the original LipeRMI API is the addition of a new method on Client:
+The only real change to the original LipeRMI API is the addition of a new method on Client. From the updated Javadoc:
 
-    /**
-     * Invokes a method on a remote object in an asynchronous manner.
-     * 
-     * @param handler Your custom handler for when the response returns from the server. Your handler must implement the AsynchronousCallHandlerIF interface;
-     * @param timeout How long to wait before the call to the server times out, in milliseconds.
-     * @param remoteObject An object on a remote server, obtained by calling Client.getGlobal.
-     * @param method The java reflection method to invoke on the remote object.
-     * @param arguments Arguments for the method invocation.
-     */
-    client.invokeAsynchronously(handler, timeout, remoteObject, method);
+    public void invokeAsynchronously(AsynchronousCallHandlerIF handler,
+                                     long timeout,
+                                     java.lang.Object remoteObject,
+                                     java.lang.reflect.Method method,
+                                     java.lang.Object... arguments)
+                                     
+    Invokes a method on a remote object in an asynchronous manner.
+    
+    Parameters:
+      handler - Your custom handler for when the response returns from the server. Your handler must implement the AsynchronousCallHandlerIF interface;
+      timeout - How long to wait before the call to the server times out, in milliseconds. If the invocation times out, a LipeRMITimeoutException will be passed as an argument to your onFailure handler.
+      remoteObject - An object on a remote server, obtained by calling Client.getGlobal.
+      method - The java reflection method to invoke on the remote object.
+      arguments - Arguments for the method invocation.
 
-If the invocation times out, a LipeRMITimeoutException will be passed as an argument to your onFailure handler.
 
 Heres an example of how to make an asynchronous call:
 
@@ -67,6 +70,4 @@ Heres an example of how to make an asynchronous call:
 
 JavaDoc
 -------
-
-You can find Jorgen's JavaDoc here: http://jorgenpt.github.com/lipermi/
-However, this javadoc is not updated to include documentation for the asynchronous additions.
+An updated javadoc can be found here: http://terraframe.github.com/lipermi/

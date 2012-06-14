@@ -96,7 +96,7 @@ public class Client {
      * Invokes a method on a remote object in an asynchronous manner.
      * 
      * @param handler Your custom handler for when the response returns from the server. Your handler must implement the AsynchronousCallHandlerIF interface;
-     * @param timeout How long to wait before the call to the server times out, in milliseconds.
+     * @param timeout How long to wait before the call to the server times out, in milliseconds. If the invocation times out, a LipeRMITimeoutException will be passed as an argument to your onFailure handler.
      * @param remoteObject An object on a remote server, obtained by calling Client.getGlobal.
      * @param method The java reflection method to invoke on the remote object.
      * @param arguments Arguments for the method invocation.
