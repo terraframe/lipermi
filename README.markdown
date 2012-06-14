@@ -1,7 +1,11 @@
 LipeRMI
 =======
 
-LipeRMI is a light-weight RMI implementation for Java. This fork adds asynchronous RMI functionality and has been well tested on Android and will be used in a production environment. This project is not limited to usage only on Android, it should work on any standard JVM.
+LipeRMI is a light-weight RMI implementation for Java. This fork adds asynchronous RMI functionality, has been well tested on Android, and will be used in a production environment. This project is not limited to usage only on Android, it should work on any standard JVM.
+
+This project is licensed under LGPL.
+
+A jar is available for easy download in the downloads section of my Github project, you don't have to checkout my entire project.
 
 This project was forked from:
 https://github.com/jorgenpt/lipermi
