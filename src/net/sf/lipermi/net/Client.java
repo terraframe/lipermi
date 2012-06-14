@@ -23,11 +23,15 @@
 package net.sf.lipermi.net;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.lipermi.exception.LipeRMITimeoutException;
+import net.sf.lipermi.handler.AsynchronousCallHandlerIF;
 import net.sf.lipermi.handler.CallHandler;
 import net.sf.lipermi.handler.CallProxy;
 import net.sf.lipermi.handler.ConnectionHandler;
@@ -86,6 +90,64 @@ public class Client {
 
     public Object getGlobal(Class<?> clazz) {
         return Proxy.newProxyInstance(clazz.getClassLoader(), new Class[] { clazz }, new CallProxy(connectionHandler));
+    }
+    
+    /**
+     * Invokes a method on a remote object in an asynchronous manner.
+     * 
+     * @param handler Your custom handler for when the response returns from the server. Your handler must implement the AsynchronousCallHandlerIF interface;
+     * @param timeout How long to wait before the call to the server times out, in milliseconds.
+     * @param remoteObject An object on a remote server, obtained by calling Client.getGlobal.
+     * @param method The java reflection method to invoke on the remote object.
+     * @param arguments Arguments for the method invocation.
+     */
+    public void invokeAsynchronously(final AsynchronousCallHandlerIF handler, final long timeout, final Object remoteObject, final Method method, final Object... arguments) {
+      final Runnable workerRunnable = new Runnable() {
+        @Override
+        public void run() {
+          try
+          {
+            Object rtn = method.invoke(remoteObject, arguments);
+            handler.onSuccess(rtn);
+          }
+          catch (Exception e) {
+            if (e instanceof InvocationTargetException && e.getCause() instanceof RuntimeException && e.getCause().getCause() instanceof InterruptedException) {
+              handler.onFailure(new LipeRMITimeoutException("The asynchronous invocation has timed out."));
+            }
+            else {
+              handler.onFailure(e);
+            }
+          }
+        }
+      };
+      
+      final Runnable timeoutRunnable = new Runnable() {
+        private Thread workerThread = new Thread(workerRunnable, "Lipe RMI Asynchronous Dispatcher");
+        
+        @Override
+        public void run()
+        {
+          try
+          {
+            workerThread.setDaemon(true);
+            workerThread.start();
+            
+            workerThread.join(timeout);
+            
+            if (workerThread.isAlive()) {
+              workerThread.interrupt();
+            }
+          }
+          catch (InterruptedException e)
+          {
+            System.out.println("Interrupted excpetion");
+          }
+        }
+      };
+      
+      Thread t = new Thread(timeoutRunnable, "Lipe RMI Asynchronous Timeout Handler");
+      t.setDaemon(true);
+      t.start();
     }
 }
 

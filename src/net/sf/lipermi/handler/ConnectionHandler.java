@@ -65,7 +65,7 @@ public class ConnectionHandler implements Runnable {
         Thread connectionHandlerThread = new Thread(connectionHandler, threadName);
         connectionHandlerThread.setDaemon(true);
         connectionHandlerThread.start();
-
+        
         return connectionHandler;
     }
 
@@ -128,11 +128,11 @@ public class ConnectionHandler implements Runnable {
                             }
                         }
                     }
-
+                    
                     Thread delegator = new Thread(new Runnable() {
                         public void run() {
                             CallLookup.handlingMe(ConnectionHandler.this);
-
+                            
                             RemoteReturn remoteReturn;
                             try {
 //                                System.out.println("remoteCall: " + remoteCall.getCallId() + " - " + remoteCall.getRemoteInstance().getInstanceId());
@@ -200,7 +200,7 @@ public class ConnectionHandler implements Runnable {
                     args[n] = remoteRef;
             }
         }
-
+        
         String methodId = method.toString().substring(15);
 
         IRemoteMessage remoteCall = new RemoteCall(remoteInstance, methodId, args, id);
@@ -224,7 +224,9 @@ public class ConnectionHandler implements Runnable {
                     try {
                         remoteReturns.wait();
                     }
-                    catch (InterruptedException ie) {}
+                    catch (InterruptedException ie) {
+                      throw new RuntimeException(ie);
+                    }
                 }
             }
         }
