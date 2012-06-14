@@ -15,7 +15,6 @@ Which, in turn, was forked from the original project, which can be found here:
  * http://lipermi.sourceforge.net
  * http://www.sourceforge.net/project/lipermi
 
-
 Asynchronous RMI
 -------
 The only real change to the original LipeRMI API is the addition of a new method on Client. From the updated Javadoc:
@@ -75,3 +74,8 @@ Heres an example of how to make an asynchronous call:
 JavaDoc
 -------
 An updated javadoc can be found here: http://terraframe.github.com/lipermi/
+
+Contact
+-------
+If you need to contact me my email address is:
+    l2.rowlands@gmail.com
