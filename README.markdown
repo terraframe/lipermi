@@ -15,6 +15,7 @@ Which, in turn, was forked from the original project, which can be found here:
 Asynchronous RMI
 -------
 The only real change to the original LipeRMI API is the addition of a new method on Client:
+
     client.invokeAsynchronously(handler, timeout, remoteObject, method);
 
 If the invocation times out, a LipeRMITimeoutException will be passed as an argument to your onFailure handler.
