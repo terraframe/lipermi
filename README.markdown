@@ -15,7 +15,15 @@ Which, in turn, was forked from the original project, which can be found here:
 Asynchronous RMI
 -------
 The only real change to the original LipeRMI API is the addition of a new method on Client:
-
+    /**
+     * Invokes a method on a remote object in an asynchronous manner.
+     * 
+     * @param handler Your custom handler for when the response returns from the server. Your handler must implement the AsynchronousCallHandlerIF interface;
+     * @param timeout How long to wait before the call to the server times out, in milliseconds.
+     * @param remoteObject An object on a remote server, obtained by calling Client.getGlobal.
+     * @param method The java reflection method to invoke on the remote object.
+     * @param arguments Arguments for the method invocation.
+     */
     client.invokeAsynchronously(handler, timeout, remoteObject, method);
 
 If the invocation times out, a LipeRMITimeoutException will be passed as an argument to your onFailure handler.
@@ -54,9 +62,6 @@ Heres an example of how to make an asynchronous call:
     
     // Invoke the method asynchronously.
     client.invokeAsynchronously(handler, timeout, remoteObject, method);
-
-
-The timoeut is in milliseconds.
 
 
 JavaDoc
