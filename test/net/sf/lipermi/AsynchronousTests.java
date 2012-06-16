@@ -3,6 +3,7 @@ package net.sf.lipermi;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
 
@@ -51,6 +52,21 @@ public class AsynchronousTests
     }
   };
   
+  AsynchronousCallHandlerIF exceptionHandler = new AsynchronousCallHandlerIF() {
+    @Override
+    public void onSuccess(Object returnValue)
+    {
+      throw new RuntimeException("This test was supposed to fail.");
+    }
+    
+    @Override
+    public void onFailure(Throwable e)
+    {
+      assertTrue(e instanceof InvocationTargetException && e.getCause() instanceof RuntimeException);
+      releaseLock();
+    }
+  };
+  
   @Test
   public void testInstantCall() throws IOException, SecurityException, NoSuchMethodException {
     AnInterface remoteObject = (AnInterface) client.getGlobal(AnInterface.class);
@@ -58,7 +74,7 @@ public class AsynchronousTests
     Method m = AnInterface.class.getMethod("imCool");
     
     lock = new CountDownLatch(1);
-    client.invokeAsynchronously(handler, 50000, remoteObject, m);
+    client.invokeAsynchronously(handler, 5000, remoteObject, m);
     waitOnCallback();
   }
   
@@ -72,37 +88,6 @@ public class AsynchronousTests
     client.invokeAsynchronously(handler, 5000, remoteObject, m);
     waitOnCallback();
   }
-  
-  
-  @Test
-  public void testBlock() {
-    Runnable r = new Runnable() {
-      @Override
-      public void run() {
-        try
-        {
-          synchronized(this) {
-            this.wait(50);
-          }
-        }
-        catch (InterruptedException e)
-        {
-          e.printStackTrace();
-          throw (new RuntimeException(e));
-        }
-        releaseLock();
-      }
-    };
-    
-    lock = new CountDownLatch(1);
-    
-    Thread t = new Thread(r);
-    t.setDaemon(true);
-    t.start();
-    
-    waitOnCallback();
-  }
-  
   
   @Test
   public void testTimeout() throws IOException, SecurityException, NoSuchMethodException {
@@ -127,6 +112,32 @@ public class AsynchronousTests
     
     lock = new CountDownLatch(1);
     client.invokeAsynchronously(timeoutHandler, 1000, remoteObject, m);
+    waitOnCallback();
+  }
+  
+  @Test
+  public void testException() throws SecurityException, NoSuchMethodException {
+    AnInterface remoteObject = (AnInterface) client.getGlobal(AnInterface.class);
+    
+    Method m = AnInterface.class.getMethod("throwAnException");
+    
+    lock = new CountDownLatch(1);
+    client.invokeAsynchronously(exceptionHandler, 5000, remoteObject, m);
+    waitOnCallback();
+  }
+  
+  @Test
+  public void testMultipleSimultaneous() throws SecurityException, NoSuchMethodException {
+    AnInterface remoteObject = (AnInterface) client.getGlobal(AnInterface.class);
+    
+    Method m = AnInterface.class.getMethod("dontReturnInstantly");
+    Method m2 = AnInterface.class.getMethod("imCool");
+    Method m3 = AnInterface.class.getMethod("throwAnException");
+    
+    lock = new CountDownLatch(3);
+    client.invokeAsynchronously(handler, 5000, remoteObject, m);
+    client.invokeAsynchronously(handler, 5000, remoteObject, m2);
+    client.invokeAsynchronously(exceptionHandler, 5000, remoteObject, m3);
     waitOnCallback();
   }
   
